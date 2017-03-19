@@ -86,5 +86,6 @@ find "$@" -type f \( -iname "*.jpg" -o -iname "*.jpeg" \) ! -name "*.tmp.jpg" \
     fi
     mv "$jpg_tmp2" "$jpg_in"
     echo "$jpg_in: Compressed: $jpg_size_report"
-  ) || { rm -f "$jpg_tmp1" "$jpg_tmp2"; }
+  )
+  [[ $? -ne 0 ]] && { rm -f "$jpg_tmp1" "$jpg_tmp2"; }
 done

@@ -44,6 +44,14 @@ else
   }
 fi
 
+sigint_handler() {
+  rm -f -- ${jpg_tmp1+"$jpeg_tmp1"} ${jpg_tmp2+"$jpeg_tmp2"}
+  trap - INT
+  kill -INT $$
+}
+
+trap sigint_handler INT
+
 find "$@" -type f \( -iname "*.jpg" -o -iname "*.jpeg" \) ! -name "*.tmp.jpg" \
 |while IFS= read -r jpg_in; do
   echo "$jpg_in ..."
@@ -70,7 +78,7 @@ find "$@" -type f \( -iname "*.jpg" -o -iname "*.jpeg" \) ! -name "*.tmp.jpg" \
     time=$(printf '%d:%02d' $((time_end / 60)) $((time_end % 60)))
     rm "$jpg_tmp1"
     jpg_out_size=$(file2size "$jpg_tmp2")
-    jpg_size_ratio=$((jpg_out_size * 100 / jpg_in_size)) || :
+    jpg_size_ratio=$((jpg_out_size * 100 / jpg_in_size))
     jpg_size_report="$jpg_in_size -> $jpg_out_size ($jpg_size_ratio %, $time)"
     if [[ $jpg_out_size -ge $jpg_in_size ]]; then
       echo "$jpg_in: Skipped: Not compressed: $jpg_size_report"
@@ -78,5 +86,5 @@ find "$@" -type f \( -iname "*.jpg" -o -iname "*.jpeg" \) ! -name "*.tmp.jpg" \
     fi
     mv "$jpg_tmp2" "$jpg_in"
     echo "$jpg_in: Compressed: $jpg_size_report"
-  ) || { rm -f "$jpg_tmp1" "$jpg_tmp2"; continue; }
+  ) || { rm -f "$jpg_tmp1" "$jpg_tmp2"; }
 done
